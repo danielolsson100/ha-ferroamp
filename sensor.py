@@ -55,13 +55,13 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
                     ThreePhaseFerroampSensor("Grid Reactive Current", "iextd", ELECTRICAL_CURRENT_AMPERE, "mdi:current-ac"),
                     ThreePhaseFerroampSensor("External Active Current", "iextq", ELECTRICAL_CURRENT_AMPERE, "mdi:current-ac"),
 
-                    ThreePhaseFerroampSensor("Grid Power", "pext", POWER_WATT, "mdi:transmission-tower"),
-                    ThreePhaseFerroampSensor("Grid Power Reactive", "pextreactive", POWER_WATT, "mdi:transmission-tower"),
-                    ThreePhaseFerroampSensor("Inverter Power, active", "pinv", POWER_WATT, "mdi:solar-power"),
-                    ThreePhaseFerroampSensor("Interter Power, reactive", "pinvreactive", POWER_WATT, "mdi:solar-power"),
+                    IntValThreePhaseFerroampSensor("Grid Power", "pext", POWER_WATT, "mdi:transmission-tower"),
+                    IntValThreePhaseFerroampSensor("Grid Power Reactive", "pextreactive", POWER_WATT, "mdi:transmission-tower"),
+                    IntValThreePhaseFerroampSensor("Inverter Power, active", "pinv", POWER_WATT, "mdi:solar-power"),
+                    IntValThreePhaseFerroampSensor("Interter Power, reactive", "pinvreactive", POWER_WATT, "mdi:solar-power"),
 
-                    ThreePhaseFerroampSensor("Consumtion Power", "pload", POWER_WATT, "mdi:power-plug"),
-                    ThreePhaseFerroampSensor("Consumtion Power Reactive", "ploadreactive", POWER_WATT, "mdi:power-plug"),
+                    IntValThreePhaseFerroampSensor("Consumtion Power", "pload", POWER_WATT, "mdi:power-plug"),
+                    IntValThreePhaseFerroampSensor("Consumtion Power Reactive", "ploadreactive", POWER_WATT, "mdi:power-plug"),
 
                     ThreePhaseEnergyFerroampSensor("External Energy Produced", "wextprodq", "mdi:power-plug"),
                     ThreePhaseEnergyFerroampSensor("External Energy Consumed", "wextconsq", "mdi:power-plug"),
@@ -78,13 +78,9 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 
                     DcLinkFerroampSensor("DC Link Voltage", "udc", "mdi:current-ac"),
 
-                    IntValFerroampSensor("System State of Charge", "soc", UNIT_PERCENTAGE, "mdi:battery"),
-                    IntValFerroampSensor("System State of Health", "soh", UNIT_PERCENTAGE, "mdi:battery"),
-                    IntValFerroampSensor("Apparent power", "sext", "VA", "mdi:transmission-tower"),
-                    
+                    IntValFerroampSensor("Apparent power", "sext", "VA", "mdi:transmission-tower"),                 
                     IntValFerroampSensor("Solar Power", "ppv", POWER_WATT, "mdi:solar-power"),
                     IntValFerroampSensor("Battery Power", "pbat", POWER_WATT, "mdi:battery"),
-                    IntValFerroampSensor("Total rated capacity of all batteries", "ratedcap", ENERGY_WATT_HOUR, "mdi:battery"),
                     ]
     eso_sensors = {}
     esm_sensors = {}
@@ -137,7 +133,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
                        EnergyFerroampSensor(f"SSO {sso_id} Total Energy", "wpv", "mdi:solar-power"),
                        StringValFerroampSensor(f"SSO {sso_id} Faultcode", "faultcode", "", "mdi:traffic-light"),
                        RelayStatusFerroampSensor(f"SSO {sso_id} Relay Status", "relaystatus"),
-                       FloatValFerroampSensor(f"SSO {sso_id} PCB Temperature", "temp", TEMP_CELSIUS, "mdi:thermometer")]
+                       IntValFerroampSensor(f"SSO {sso_id} PCB Temperature", "temp", TEMP_CELSIUS, "mdi:thermometer")]
 
         update_sensor_from_event(event, sensors, store)
     
@@ -156,8 +152,8 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
                        BatteryFerroampSensor(f"ESO {eso_id} State of Charge", "soc"),
                        StringValFerroampSensor(f"ESO {eso_id} Faultcode", "faultcode", "", "mdi:traffic-light"),
                        RelayStatusFerroampSensor(f"ESO {eso_id} Relay Status", "relaystatus"),
-                       FloatValFerroampSensor(f"ESO {eso_id} PCB Temperature", "temp", TEMP_CELSIUS, "mdi:thermometer")]
-
+                       IntValFerroampSensor(f"ESO {eso_id} PCB Temperature", "temp", TEMP_CELSIUS, "mdi:thermometer")]
+                       
         update_sensor_from_event(event, sensors, store)
     
 
@@ -168,8 +164,8 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
         sensors = esm_sensors.get(esm_id)
         if store is None:
             store = esm_store[esm_id] = {}
-            sensors = esm_sensors[esm_id] = [IntValFerroampSensor(f"ESM {esm_id} State of Health", "soh", UNIT_PERCENTAGE, "mdi:battery"),
-                                             IntValFerroampSensor(f"ESM {esm_id} State of Charge", "soc", UNIT_PERCENTAGE, "mdi:battery"),
+            sensors = esm_sensors[esm_id] = [FloatValFerroampSensor(f"ESM {esm_id} State of Health", "soh", UNIT_PERCENTAGE, "mdi:battery"),
+                                             FloatValFerroampSensor(f"ESM {esm_id} State of Charge", "soc", UNIT_PERCENTAGE, "mdi:battery"),
                                              IntValFerroampSensor(f"ESM {esm_id} Rated Capacity", "ratedCapacity", ENERGY_WATT_HOUR, "mdi:battery")]
 
         update_sensor_from_event(event, sensors, store)
@@ -280,7 +276,7 @@ class FloatValFerroampSensor(FerroampSensor):
         v = self.event.get(self._state_key, None)
         
         if v != None:
-            v = round(float(v["val"]), 2)
+            v = round(float(v["val"]), 1)
 
         return v
 
@@ -334,8 +330,17 @@ class BatteryFerroampSensor(IntValFerroampSensor):
             self._icon = "mdi:battery-medium"
         else:
             self._icon = "mdi:battery-high"
-        
+                   
         return self._icon
+    
+    @property
+    def state(self):
+        """Return the state of the sensor."""
+        v = self.event.get(self._state_key, None)      
+        if v != None:
+            v = round(float(v["val"]), 1)
+
+        return v
 
 class EnergyFerroampSensor(IntValFerroampSensor):
     """Representation of a Ferroamp energy in kWh value Sensor."""
@@ -350,7 +355,7 @@ class EnergyFerroampSensor(IntValFerroampSensor):
         v = super().state
 
         if v != None:
-            return int(v/3600000000)
+            return round(float(v/3600000000),1)
 
         return v
 
@@ -373,7 +378,6 @@ class RelayStatusFerroampSensor(IntValFerroampSensor):
 
         return v
 
-
 class PowerFerroampSensor(FerroampSensor):
     """Representation of a Ferroamp Power Sensor based on V and A."""
 
@@ -391,9 +395,8 @@ class PowerFerroampSensor(FerroampSensor):
         if current is None or voltage is None:
             return None
         
-        return round(float(voltage["val"]) * float(current["val"]) / 1000, 2)
-
-
+        return round(float(voltage["val"]) * float(current["val"]) / 1000, 1)
+        
 class ThreePhaseFerroampSensor(FerroampSensor):
     """Representation of a Ferroamp Threephase Sensor."""
 
@@ -415,8 +418,36 @@ class ThreePhaseFerroampSensor(FerroampSensor):
         if phases is None:
             return None
         
-        return int(phases["L1"] + phases["L2"] + phases["L3"])
+        return round(float(phases["L1"] + phases["L2"] + phases["L3"]),1)
 
+    @property
+    def state_attributes(self):
+        """Return the state of the sensor."""
+        return self.get_phases()
+
+class IntValThreePhaseFerroampSensor(FerroampSensor):
+    """Representation of a Ferroamp Threephase Sensor."""
+
+    def __init__(self, name, key, unit, icon):
+        """Initialize the sensor."""
+        super().__init__(name, key, unit, icon)
+
+    def get_phases(self):
+        phases = self.event.get(self._state_key, None)
+        _LOGGER.debug(phases)
+        if phases != None:
+            phases = dict(L1=float(phases["L1"]), L2=float(phases["L2"]), L3=float(phases["L3"]))
+        return phases
+
+    @property
+    def state(self):
+        """Return the state of the sensor."""
+        phases = self.get_phases()
+        if phases is None:
+            return None
+        
+        return int(phases["L1"] + phases["L2"] + phases["L3"])
+        
     @property
     def state_attributes(self):
         """Return the state of the sensor."""
@@ -431,7 +462,5 @@ class ThreePhaseEnergyFerroampSensor(ThreePhaseFerroampSensor):
     def get_phases(self):
         phases = super().get_phases()
         if phases != None:
-            phases = dict(L1=int(phases["L1"]/3600000000), L2=int(phases["L2"]/3600000000), L3=int(phases["L3"]/3600000000)) 
-
+            phases = dict(L1=round(float(phases["L1"]/3600000000),1), L2=round(float(phases["L2"]/3600000000),1), L3=round(float(phases["L3"]/3600000000),1)) 
         return phases
-
