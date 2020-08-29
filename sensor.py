@@ -80,7 +80,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 
                     IntValFerroampSensor("System State of Charge", "soc", UNIT_PERCENTAGE, "mdi:battery"),
                     IntValFerroampSensor("System State of Health", "soh", UNIT_PERCENTAGE, "mdi:battery"),
-                    IntValFerroampSensor("Apparent power", "sext", "VA", "mdi:mdi-transmission-tower"),
+                    IntValFerroampSensor("Apparent power", "sext", "VA", "mdi:transmission-tower"),
                     
                     IntValFerroampSensor("Solar Power", "ppv", POWER_WATT, "mdi:solar-power"),
                     IntValFerroampSensor("Battery Power", "pbat", POWER_WATT, "mdi:battery"),
