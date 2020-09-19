@@ -23,7 +23,7 @@ from homeassistant.const import (
     TEMP_FAHRENHEIT,
     POWER_WATT,
     VOLT,
-    UNIT_PERCENTAGE
+    PERCENTAGE
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -164,8 +164,8 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
         sensors = esm_sensors.get(esm_id)
         if store is None:
             store = esm_store[esm_id] = {}
-            sensors = esm_sensors[esm_id] = [FloatValFerroampSensor(f"ESM {esm_id} State of Health", "soh", UNIT_PERCENTAGE, "mdi:battery"),
-                                             FloatValFerroampSensor(f"ESM {esm_id} State of Charge", "soc", UNIT_PERCENTAGE, "mdi:battery"),
+            sensors = esm_sensors[esm_id] = [FloatValFerroampSensor(f"ESM {esm_id} State of Health", "soh", PERCENTAGE, "mdi:battery"),
+                                             FloatValFerroampSensor(f"ESM {esm_id} State of Charge", "soc", PERCENTAGE, "mdi:battery"),
                                              IntValFerroampSensor(f"ESM {esm_id} Rated Capacity", "ratedCapacity", ENERGY_WATT_HOUR, "mdi:battery")]
 
         update_sensor_from_event(event, sensors, store)
@@ -320,7 +320,7 @@ class DcLinkFerroampSensor(FerroampSensor):
 class BatteryFerroampSensor(IntValFerroampSensor):
 
     def __init__(self, name, key):
-        super().__init__(name, key, UNIT_PERCENTAGE, "mdi:battery-low")
+        super().__init__(name, key, PERCENTAGE, "mdi:battery-low")
 
     @property
     def icon(self):
